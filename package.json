@@ -1,0 +1,21 @@
+{
+  "name": "dulllog",
+  "version": "0.0.1",
+  "description": "Simple and dull logger",
+  "main": "dist/dulllog.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "example": "vite example/",
+    "dev": "vite",
+    "build": "tsc --emitDeclarationOnly && vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.4.5"
+  },
+  "dependencies": {
+    "vite": "^4.4.7"
+  }
+}
