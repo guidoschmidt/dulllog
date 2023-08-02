@@ -7,7 +7,7 @@
   "scripts": {
     "example": "vite example/",
     "dev": "vite",
-    "build": "tsc --emitDeclarationOnly && vite build"
+    "build": "tsc --emitDeclarationOnly && vite build && cd example.lib && pnpm build"
   },
   "keywords": [],
   "author": "",

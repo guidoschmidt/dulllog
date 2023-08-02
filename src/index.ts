@@ -2,93 +2,132 @@ class Logger {
   [key: string]: any;
 
   private _active: number = 0b0000000000000;
-  private _levels: { [key: number]: string } = {};
+  private _scopes: { [key: number]: string } = {};
 
+  public _scopeMap: { [key: string]: number } = {};
+
+  // Logger is treatet as a singleton
+  constructor() {
+    if (globalThis.L === undefined) {
+      globalThis.L === this;
+    }
+    return globalThis.L;
+  }
+
+  // Extends the logger by adding a scope to its _scopeMap.
+  // A scope is just a grouping of logs
+  public extend(scope: string): void {
+    globalThis.L.addScope(scope.toUpperCase());
+  }
+
+  // Adds a given scope to the Logger singleton instance
+  private addScope(scope: string): void {
+    const existingScopeCount = Object.keys(globalThis.L._scopes).length;
+    const bitMask = 0b0000000000001 << (existingScopeCount + 1);
+    globalThis.L._scopes[bitMask] = scope;
+    globalThis.L[scope] = bitMask;
+    globalThis.SCOPE_COUNT++;
+  }
+
+  // Used to wrap all the native console.x calls into groups with a
+  // given scope
   private _wrap(lvl: number, logFn: Function, ...messages: any) {
     return () => {
-      console.group(`${this._levels[lvl]}`.trim());
+      console.group(`${this._scopes[lvl]}`.trim());
       logFn(...messages);
       console.groupEnd();
     };
   }
 
-  public setLogLevels(levels: string[]): void {
-    levels.forEach((lvl: string, i: number) => {
-      const bitMask = 0b0000000000001 << i;
-      this._levels[bitMask] = lvl;
-      this[lvl] = bitMask;
-    });
+  // Enables only a given scope, disabling all the other scopes
+  public only(scope: number): void {
+    this.mute();
+    this.enable(scope);
   }
 
-  public enable(lvl: number) {
-    this._active = this._active | lvl;
+  // Enables a given scope
+  public enable(scope: number): void {
+    this._active = this._active | scope;
   }
 
-  public disable(lvl: number) {
-    this._active = this._active & ~lvl;
+  // Disables a given scope
+  public disable(scope: number): void {
+    this._active = this._active & ~scope;
   }
 
-  public mute() {
+  // Disables all the scopes
+  public mute(): void {
     this._active = 0b0000000000000;
   }
 
-  public verbose() {
+  // Enables all the scopes
+  public verbose(): void {
     this._active = 0b1111111111111;
   }
 
-  public log(lvl: number, ...messages: any) {
-    if ((this._active & lvl) === lvl) {
-      this._wrap(lvl, console.log, ...messages)();
+  public log(scope: number, ...messages: any): void {
+    if ((this._active & scope) === scope) {
+      this._wrap(scope, console.log, ...messages)();
     }
   }
 
-  public table(lvl: number, ...messages: any): void {
-    if ((L._active & lvl) === lvl) {
-      L._wrap(lvl, console.table, ...messages)();
+  public table(scope: number, ...messages: any): void {
+    if ((L._active & scope) === scope) {
+      L._wrap(scope, console.table, ...messages)();
     }
   }
 
-  public error(lvl: number, ...messages: any): void {
-    if ((L._active & lvl) === lvl) {
-      L._wrap(lvl, console.error, ...messages)();
+  public error(scope: number, ...messages: any): void {
+    if ((L._active & scope) === scope) {
+      L._wrap(scope, console.error, ...messages)();
     }
   }
 
-  public info(lvl: number, ...messages: any): void {
-    if ((L._active & lvl) === lvl) {
-      L._wrap(lvl, console.info, ...messages)();
+  public info(scope: number, ...messages: any): void {
+    if ((L._active & scope) === scope) {
+      L._wrap(scope, console.info, ...messages)();
     }
   }
 
-  public time(lvl: number, ...messages: any): void {
-    if ((L._active & lvl) === lvl) {
-      L._wrap(lvl, console.time, ...messages)();
+  public time(scope: number, ...messages: any): void {
+    if ((L._active & scope) === scope) {
+      L._wrap(scope, console.time, ...messages)();
     }
   }
 
-  public warn(lvl: number, ...messages: any): void {
-    if ((L._active & lvl) === lvl) {
-      L._wrap(lvl, console.warn, ...messages)();
+  public warn(scope: number, ...messages: any): void {
+    if ((L._active & scope) === scope) {
+      L._wrap(scope, console.warn, ...messages)();
     }
   }
 
-  public trace(lvl: number, ...messages: any): void {
-    if ((L._active & lvl) === lvl) {
-      L._wrap(lvl, console.trace, ...messages)();
+  public trace(scope: number, ...messages: any): void {
+    if ((L._active & scope) === scope) {
+      L._wrap(scope, console.trace, ...messages)();
+    }
+  }
+
+  public ipc(
+    channel: string = "mainLog",
+    scope: number,
+    ...messages: any
+  ): void {
+    if (window?.contextBridge) {
+      window?.contextBridge.send(channel, { ...messages, tag: scope });
     }
   }
 }
 
 declare global {
   var L: Logger;
+  var SCOPE_COUNT: number;
   interface Window {
     L: Logger;
+    SCOPE_COUNT: number;
+    contextBridge?: any;
   }
 }
 
-const L = new Logger();
+globalThis.L = new Logger();
 
-window.L = L;
-globalThis.L = L;
-
-export { L };
+export type { Logger };

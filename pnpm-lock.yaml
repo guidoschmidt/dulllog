@@ -5,12 +5,14 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@types/node':
-    specifier: ^20.4.5
-    version: 20.4.5
   vite:
     specifier: ^4.4.7
     version: 4.4.7(@types/node@20.4.5)
+
+devDependencies:
+  '@types/node':
+    specifier: ^20.4.5
+    version: 20.4.5
 
 packages:
 
@@ -214,7 +216,6 @@ packages:
 
   /@types/node@20.4.5:
     resolution: {integrity: sha512-rt40Nk13II9JwQBdeYqmbn2Q6IVTA5uPhvSO+JVqdXw/6/4glI6oR9ezty/A9Hg5u7JH4OmYmuQ+XvjKm0Datg==}
-    dev: false
 
   /esbuild@0.18.17:
     resolution: {integrity: sha512-1GJtYnUxsJreHYA0Y+iQz2UEykonY66HNWOb0yXYZi9/kNrORUEHVg87eQsCtqh59PEJ5YVZJO98JHznMJSWjg==}

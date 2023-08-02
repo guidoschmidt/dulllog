@@ -1,27 +1,36 @@
 declare class Logger {
     [key: string]: any;
     private _active;
-    private _levels;
+    private _scopes;
+    _scopeMap: {
+        [key: string]: number;
+    };
+    constructor();
+    extend(scope: string): void;
+    private addScope;
     private _wrap;
-    setLogLevels(levels: string[]): void;
-    enable(lvl: number): void;
-    disable(lvl: number): void;
+    only(scope: number): void;
+    enable(scope: number): void;
+    disable(scope: number): void;
     mute(): void;
     verbose(): void;
-    log(lvl: number, ...messages: any): void;
-    table(lvl: number, ...messages: any): void;
-    error(lvl: number, ...messages: any): void;
-    info(lvl: number, ...messages: any): void;
-    time(lvl: number, ...messages: any): void;
-    warn(lvl: number, ...messages: any): void;
-    trace(lvl: number, ...messages: any): void;
+    log(scope: number, ...messages: any): void;
+    table(scope: number, ...messages: any): void;
+    error(scope: number, ...messages: any): void;
+    info(scope: number, ...messages: any): void;
+    time(scope: number, ...messages: any): void;
+    warn(scope: number, ...messages: any): void;
+    trace(scope: number, ...messages: any): void;
+    ipc(channel: string | undefined, scope: number, ...messages: any): void;
 }
 declare global {
     var L: Logger;
+    var SCOPE_COUNT: number;
     interface Window {
         L: Logger;
+        SCOPE_COUNT: number;
+        contextBridge?: any;
     }
 }
-declare const L: Logger;
-export { L };
+export type { Logger };
 //# sourceMappingURL=index.d.ts.map

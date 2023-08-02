@@ -1,0 +1,12 @@
+{
+  "name": "example.lib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/example.lib.mjs",
+  "scripts": {
+    "build": "vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
