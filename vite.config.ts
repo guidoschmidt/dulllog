@@ -10,7 +10,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
       name: pkg.name,
-      fileName: "index",
+      fileName: pkg.name,
     },
   },
 });

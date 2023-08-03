@@ -1,4 +1,4 @@
-import "../dist";
+import "../";
 import { executeSth } from "./anotherFile";
 
 const l = L.extend("LIBRARY", "🗺️", "rgb(12, 30, 240)");
