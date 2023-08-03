@@ -9,9 +9,9 @@
     "dev": "vite build --watch",
     "build": "tsc --emitDeclarationOnly && vite build && cd example.lib && pnpm build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["logger", "logging", "log", "Typescript", "interactive"],
+  "author": "Guido Schmidt <git@guidoschmidt.cc>",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.4.5"
   },
