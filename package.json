@@ -6,7 +6,7 @@
   "types": "types/index.d.ts",
   "scripts": {
     "example": "vite example/",
-    "dev": "vite",
+    "dev": "vite build --watch",
     "build": "tsc --emitDeclarationOnly && vite build && cd example.lib && pnpm build"
   },
   "keywords": [],

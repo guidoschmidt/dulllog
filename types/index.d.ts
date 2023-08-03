@@ -1,12 +1,25 @@
+type LogFun = (...messages: any) => void;
+export type ExtendedLogger = {
+    log: LogFun;
+    error: LogFun;
+    warn: LogFun;
+    table: LogFun;
+    info: LogFun;
+    time: LogFun;
+    trace: LogFun;
+};
+export type Scope = {
+    bitMask: number;
+    color?: string;
+    prefix?: string;
+};
 declare class Logger {
     [key: string]: any;
     private _active;
     private _scopes;
-    _scopeMap: {
-        [key: string]: number;
-    };
+    private _scopeMap;
     constructor();
-    extend(scope: string): void;
+    extend(scope: string, prefix?: string, color?: string): ExtendedLogger;
     private addScope;
     private _wrap;
     only(scope: number): void;
@@ -14,21 +27,11 @@ declare class Logger {
     disable(scope: number): void;
     mute(): void;
     verbose(): void;
-    log(scope: number, ...messages: any): void;
-    table(scope: number, ...messages: any): void;
-    error(scope: number, ...messages: any): void;
-    info(scope: number, ...messages: any): void;
-    time(scope: number, ...messages: any): void;
-    warn(scope: number, ...messages: any): void;
-    trace(scope: number, ...messages: any): void;
-    ipc(channel: string | undefined, scope: number, ...messages: any): void;
 }
 declare global {
     var L: Logger;
-    var SCOPE_COUNT: number;
     interface Window {
         L: Logger;
-        SCOPE_COUNT: number;
         contextBridge?: any;
     }
 }

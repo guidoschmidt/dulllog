@@ -1,10 +1,10 @@
 import "../dist";
 import { executeSth } from "./anotherFile";
 
-L.extend("LIBRARY");
+const l = L.extend("LIBRARY", "🗺️", "rgb(12, 30, 240)");
 
 setInterval(() => {
-  L.log(L.LIBRARY, "Test from lib");
-  L.error(L.LIBRARY, "An error from lib");
+  l.log("Test from lib");
+  l.error("An error from lib");
   executeSth();
 }, 3000);

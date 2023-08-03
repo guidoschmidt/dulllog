@@ -1,10 +1,27 @@
+type LogFun = (...messages: any) => void;
+
+export type ExtendedLogger = {
+  log: LogFun;
+  error: LogFun;
+  warn: LogFun;
+  table: LogFun;
+  info: LogFun;
+  time: LogFun;
+  trace: LogFun;
+};
+
+export type Scope = {
+  bitMask: number;
+  color?: string;
+  prefix?: string;
+};
+
 class Logger {
   [key: string]: any;
 
   private _active: number = 0b0000000000000;
   private _scopes: { [key: number]: string } = {};
-
-  public _scopeMap: { [key: string]: number } = {};
+  private _scopeMap: Map<string, Scope> = new Map();
 
   // Logger is treatet as a singleton
   constructor() {
@@ -14,28 +31,75 @@ class Logger {
     return globalThis.L;
   }
 
-  // Extends the logger by adding a scope to its _scopeMap.
+  // Extends the logger by adding a scope.
   // A scope is just a grouping of logs
-  public extend(scope: string): void {
-    globalThis.L.addScope(scope.toUpperCase());
+  public extend(
+    scope: string,
+    prefix?: string,
+    color?: string
+  ): ExtendedLogger {
+    const scopeObject = globalThis.L.addScope(
+      scope.toUpperCase(),
+      prefix,
+      color
+    );
+    return {
+      log: (...messages: any) =>
+        this._wrap(scopeObject, console.log, ...messages)(),
+      error: (...messages: any) =>
+        this._wrap(scopeObject, console.error, ...messages)(),
+      warn: (...messages: any) =>
+        this._wrap(scopeObject, console.warn, ...messages)(),
+      table: (...messages: any) =>
+        this._wrap(scopeObject, console.table, ...messages)(),
+      info: (...messages: any) =>
+        this._wrap(scopeObject, console.info, ...messages)(),
+      time: (...messages: any) =>
+        this._wrap(scopeObject, console.time, ...messages)(),
+      trace: (...messages: any) =>
+        this._wrap(scopeObject, console.trace, ...messages)(),
+    };
   }
 
   // Adds a given scope to the Logger singleton instance
-  private addScope(scope: string): void {
+  private addScope(scope: string, prefix?: string, color?: string): Scope {
+    if (this._scopeMap.has(scope)) return this._scopeMap.get(scope)!;
     const existingScopeCount = Object.keys(globalThis.L._scopes).length;
-    const bitMask = 0b0000000000001 << (existingScopeCount + 1);
-    globalThis.L._scopes[bitMask] = scope;
-    globalThis.L[scope] = bitMask;
-    globalThis.SCOPE_COUNT++;
+    const bitMask = 0b1 << existingScopeCount;
+    const scopeObject = {
+      bitMask,
+      color,
+      prefix,
+    };
+    this._scopes[bitMask] = scope;
+    this._scopeMap.set(scope, scopeObject);
+    this[scope] = bitMask;
+    return scopeObject;
   }
 
   // Used to wrap all the native console.x calls into groups with a
   // given scope
-  private _wrap(lvl: number, logFn: Function, ...messages: any) {
+  private _wrap(scopeObject: Scope, logFn: Function, ...messages: any) {
     return () => {
-      console.group(`${this._scopes[lvl]}`.trim());
-      logFn(...messages);
-      console.groupEnd();
+      const { color, bitMask, prefix } = scopeObject;
+      if ((this._active & bitMask) === bitMask) {
+        if (color != undefined) {
+          console.group(
+            `%c${prefix ? prefix + " " : ""}${
+              this._scopes[bitMask]
+            } ${new Date().toISOString()}`.trim(),
+            `color: ${color}`
+          );
+        } else {
+          console.group(
+            `${prefix ? prefix + " " : ""}${
+              this._scopes[bitMask]
+            } ${new Date().toISOString()}`.trim()
+          );
+        }
+        logFn(...messages);
+        console.groupEnd();
+      }
     };
   }
 
@@ -64,70 +128,19 @@ class Logger {
   public verbose(): void {
     this._active = 0b1111111111111;
   }
-
-  public log(scope: number, ...messages: any): void {
-    if ((this._active & scope) === scope) {
-      this._wrap(scope, console.log, ...messages)();
-    }
-  }
-
-  public table(scope: number, ...messages: any): void {
-    if ((L._active & scope) === scope) {
-      L._wrap(scope, console.table, ...messages)();
-    }
-  }
-
-  public error(scope: number, ...messages: any): void {
-    if ((L._active & scope) === scope) {
-      L._wrap(scope, console.error, ...messages)();
-    }
-  }
-
-  public info(scope: number, ...messages: any): void {
-    if ((L._active & scope) === scope) {
-      L._wrap(scope, console.info, ...messages)();
-    }
-  }
-
-  public time(scope: number, ...messages: any): void {
-    if ((L._active & scope) === scope) {
-      L._wrap(scope, console.time, ...messages)();
-    }
-  }
-
-  public warn(scope: number, ...messages: any): void {
-    if ((L._active & scope) === scope) {
-      L._wrap(scope, console.warn, ...messages)();
-    }
-  }
-
-  public trace(scope: number, ...messages: any): void {
-    if ((L._active & scope) === scope) {
-      L._wrap(scope, console.trace, ...messages)();
-    }
-  }
-
-  public ipc(
-    channel: string = "mainLog",
-    scope: number,
-    ...messages: any
-  ): void {
-    if (window?.contextBridge) {
-      window?.contextBridge.send(channel, { ...messages, tag: scope });
-    }
-  }
 }
 
 declare global {
   var L: Logger;
-  var SCOPE_COUNT: number;
   interface Window {
     L: Logger;
-    SCOPE_COUNT: number;
     contextBridge?: any;
   }
 }
 
-globalThis.L = new Logger();
+const L = new Logger();
+
+globalThis.L = L;
+window.L = L;
 
 export type { Logger };
