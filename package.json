@@ -1,9 +1,9 @@
 {
   "name": "dulllog",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Simple and dull logger",
   "main": "dist/dulllog.mjs",
-  "types": "dist/index.d.ts",
+  "types": "types/index.d.ts",
   "scripts": {
     "example": "vite example/",
     "dev": "vite build --watch",
